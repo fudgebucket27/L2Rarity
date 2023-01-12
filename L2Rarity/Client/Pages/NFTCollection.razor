@@ -112,7 +112,7 @@ else
 
     private async void DoSearch()
     {
-        if(string.IsNullOrEmpty(searchTerm!.Trim()))
+        if(!string.IsNullOrEmpty(searchTerm!.Trim()))
         {
             if (rankings!.rankings.Any(x => x.i == searchTerm.Trim()))
             {
