@@ -1,0 +1,194 @@
+﻿@page "/nft-collections/{CollectionId}/{Id}"
+@using L2Rarity.Shared
+@using System.Globalization;
+@inject HttpClient Http
+@implements IDisposable;
+
+@if(NftMetadata == null)
+{
+    <MudText Typo="Typo.body1">Loading...</MudText>
+}
+else
+{
+    <MudGrid>
+        <MudItem sm="6">
+            <MudPaper Class="d-flex align-content-center" Elevation="0" Outlined="false">
+                <MudImage Src="@ImageSourceUrl" ObjectFit="ObjectFit.Contain" ObjectPosition="ObjectPosition.Center" Fluid="true" loading="lazy" />
+            </MudPaper>
+        </MudItem>
+        <MudItem sm="6">
+            <MudPaper Class="d-flex" Elevation="0" Outlined="false">
+                <MudStack>
+                    <MudPaper Elevation="0" Outlined="false">
+                        <MudText Typo="Typo.h5" Inline="true" Color="Color.Warning" Align="Align.Start">Rank @NftMetadata.Rank | </MudText>
+                        <MudText Typo="Typo.h6" Inline="true" Color="Color.Success" Align="Align.End">#@NftMetadata.nftNumber | Score @NftMetadata.Score</MudText>
+                        @if (!string.IsNullOrEmpty(NftMetadata.marketplaceUrl) && NftMetadata.marketplaceUrl.Contains("nft.gamestop.com"))
+                        {
+                            @if (GameStopNftListing != null)
+                            {
+                                if (GameStopNftListing.Values.FirstOrDefault()!.loopringSaleInfo != null)
+                                {
+                                    <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | @ToString(Double.Parse(GameStopNftListing.Values.FirstOrDefault()!.loopringSaleInfo!.minPricePerNftInWei!),18) ETH</MudText>
+                                    <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudTooltip Text="@scorePriceRatio"><MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@gamestopMarketplaceUrl" Target="_blank"></MudIconButton></MudTooltip></MudText>
+                                }
+                                else if (GameStopNftListing.Values.FirstOrDefault()!.loopringSaleInfo == null)
+                                {
+                                    <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | N/A </MudText>
+                                    <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@gamestopMarketplaceUrl" Target="_blank"></MudIconButton></MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@gamestopMarketplaceUrl" Target="_blank"></MudIconButton></MudText>
+                                }
+                            }
+                            else if (isLoading == true)
+                            {
+                                <MudText Typo="Typo.caption" Inline="true"> | Fetching price...</MudText>
+                            }
+                        }
+                        else if (!string.IsNullOrEmpty(NftMetadata.marketplaceUrl))
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@NftMetadata.marketplaceUrl" Target="_blank"></MudIconButton>
+                        }
+                    </MudPaper>
+                    <MudPaper Elevation="0" Outlined="false">
+                        <MudTable Items="@NftMetadata.attributes" Striped="true" Dense="true" Hover="true" SortLabel="Sort By" Outlined="false" Breakpoint="Breakpoint.Sm" HorizontalScrollbar="true">
+                            <ToolBarContent>
+                                <MudText Typo="Typo.h5">Traits(@NftMetadata!.attributes!.Count categories)</MudText>
+                            </ToolBarContent>
+                            <HeaderContent>
+                                <MudTh><MudTableSortLabel SortBy="new Func<Trait, object>(x=>x.trait_type!)">Type</MudTableSortLabel></MudTh>
+                                <MudTh><MudTableSortLabel SortBy="new Func<Trait, object>(x=>x.value!)">Value</MudTableSortLabel></MudTh>
+                                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<Trait, object>(x=>x.score)">Score</MudTableSortLabel></MudTh>
+                                <MudTh><MudTableSortLabel SortBy="new Func<Trait, object>(x=>x.count)">Occurence</MudTableSortLabel></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Type">@context.trait_type</MudTd>
+                                <MudTd DataLabel="Value">@context.value</MudTd>
+                                <MudTd DataLabel="Score">@Decimal.Round(@context.score,2)</MudTd>
+                                <MudTd DataLabel="Occurrence">@context.count (@context.ReturnPercentange(@CollectionTotal)%)</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                        <MudButton Variant="Variant.Filled" Href="@collectionUrl">View Collection</MudButton>
+                    </MudPaper>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+
+    [Parameter]
+    public string? CollectionId { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+    public int CollectionTotal { get; set; }
+
+    public NftMetadata? NftMetadata { get; set; }
+
+    public string? ImageSourceUrl { get; set; }
+
+    public string? collectionUrl { get; set; }
+
+    public Dictionary<string, Value>? GameStopNftListing { get; set; }
+
+    public string? gamestopMarketplaceUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CollectionStats? collectionStats = await Http.GetFromJsonAsync<CollectionStats>($"api/rarity/stats?collectionId={CollectionId}");
+        CollectionTotal = collectionStats!.total;
+        NftMetadata = await Http.GetFromJsonAsync<NftMetadata>($"api/rarity/rankingsSingle?collectionId={CollectionId}&nftNumber={Id}");
+        ImageSourceUrl = $"https://loopring.mypinata.cloud/ipfs/{NftMetadata!.image!.Remove(0, 7)}";
+        collectionUrl = $"nft-collections/{CollectionId}";
+
+        if (NftMetadata != null && !string.IsNullOrEmpty(NftMetadata!.marketplaceUrl!) && NftMetadata!.marketplaceUrl!.Contains("nft.gamestop.com"))
+        {
+            isLoading = true;
+            GameStopNftListing = await Http.GetFromJsonAsync<Dictionary<string, Value>>($"api/gamestop/listing?nftId={NftMetadata!.nftId}", cts.Token);
+            gamestopMarketplaceUrl = $"https://nft.gamestop.com/token/{collectionStats.contractAddress}/{NftMetadata.tokenId}";
+            isLoading = false;
+        }
+    }
+    CancellationTokenSource cts = new CancellationTokenSource();
+
+    bool isLoading = false;
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        cts.Dispose();
+    }
+
+    private CultureInfo Culture = CultureInfo.InvariantCulture;
+
+    private decimal ScorePriceRatio(decimal rarityScore, decimal price)
+    {
+        return rarityScore / price;
+    }
+
+    private decimal ToDecimal(Double? balance, int? decimals, decimal conversionRate = 1)
+    {
+        if (balance == null) return 0;
+        return (decimal)(((decimals ?? 0) > 0) ? balance / Math.Pow(10, (double)decimals!) : balance) * conversionRate;
+    }
+
+    private string ToString(Double? balance, int? decimals, decimal conversionRate = 1)
+    {
+        if (balance == null) return "";
+
+        decimal floatBalance = ToDecimal(balance, decimals, conversionRate);
+        string format = "";
+        if (decimals != null)
+        {
+            //reduce digits, the larger balance is, i.e. exponent (never reduce digits, if sub zero)
+            int formatDecimals = Math.Max(decimals.Value - Math.Max((int)Math.Log10(Math.Abs((double)floatBalance)), 0), 0);
+            format = $"#,###0.{new string('#', formatDecimals)}";
+        }
+        return floatBalance.ToString(format, Culture);
+    }
+
+    private decimal ToDecimalWithExponent(decimal amount, out string exponentPrefix)
+    {
+        exponentPrefix = "";
+        if (amount == 0) return amount;
+
+        //get the exponent - sign doesn't matter, i.e. 6 for 1,000,000 aka 1E6
+        var exponent = Math.Log10((double)Math.Abs(amount));
+
+        //we since we're only interested in k, M and B, keep it simple
+        if (exponent >= 9)
+        {
+            exponentPrefix = "B";
+            return amount / (decimal)1E9;
+        }
+        else if (exponent >= 6)
+        {
+            exponentPrefix = "M";
+            return amount / (decimal)1E6;
+        }
+        else if (exponent >= 3)
+        {
+            exponentPrefix = "k";
+            return amount / (decimal)1E3;
+        }
+        else
+            return amount;
+    }
+
+    private string ToStringWithExponent(double num, int decimals, decimal conversionRate, string format = "N3")
+    {
+        string expPrefix = "";
+        decimal amount = ToDecimalWithExponent(ToDecimal(num, decimals, conversionRate), out expPrefix);
+        return amount.ToString(format, Culture) + expPrefix;
+    }
+
+    public string? scorePriceRatio
+    {
+        get
+        {
+            return "Score/Price Ratio:" + ScorePriceRatio(NftMetadata!.Score, Decimal.Parse(@ToString(Double.Parse(GameStopNftListing!.Values.FirstOrDefault()!.loopringSaleInfo!.minPricePerNftInWei!), 18), NumberStyles.Number)).ToString("0.00");
+        }
+    }
+}

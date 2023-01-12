@@ -1,0 +1,252 @@
+﻿@page "/nft-collections/{collectionId}"
+@using L2Rarity.Shared
+@inject HttpClient Http
+@inject IDialogService DialogService;
+
+@if (rankings == null)
+{
+    <MudText Typo="Typo.body1">Loading...</MudText>
+}
+else
+{
+    <MudText Typo="Typo.h6">@rankings.collectionname <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@rankings.marketplaceurl" Target="_blank"></MudIconButton> </MudText>
+    <MudText Typo="Typo.caption">@rankings.total.ToString("N0") items</MudText>
+    @if(currentFilters.Count > 0)
+    {
+        <br/>
+    }
+    @foreach (var currentFilter in currentFilters)
+    {
+        <MudButton @onclick="@(async () => await FilterRankings(currentFilter))" Variant="Variant.Filled" Size="Size.Small" Disabled="@filterDisabled">@currentFilter.trait_type:@currentFilter.value</MudButton>
+    }
+    @if (currentFilters.Count > 0)
+    {
+        <br/>
+    }
+    <MudGrid>
+        <MudItem xs="12" md="3">
+            <MudTextField Style="background-color:white;" @bind-Value="searchTerm" Label="Enter your NFT ID" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Info" OnAdornmentClick="DoSearch" Margin="Margin.Dense" />
+            <MudSelect Style="background-color:white;" @bind-Value="RankType" Label="Order by" Placeholder="Please Select" AdornmentIcon="@Icons.Material.Filled._123" AdornmentColor="Color.Primary">
+                <MudSelectItem Value="@("rankingAsc")">Rank: High to Low</MudSelectItem>
+                <MudSelectItem Value="@("rankingDsc")">Rank: Low to High</MudSelectItem>
+                <MudSelectItem Value="@("idAsc")">ID: High to Low</MudSelectItem>
+                <MudSelectItem Value="@("idDsc")">ID: Low to High</MudSelectItem>
+            </MudSelect>
+            <MudExpansionPanels MultiExpansion="true">
+                <MudExpansionPanel Text="Trait Filters">
+                    <MudExpansionPanels MultiExpansion="true">
+                        @foreach (var traitFilter in traitFilters!)
+                        {
+                            <MudExpansionPanel Text="@traitFilter.FilterName!.ToUpper()" title="@traitFilter.FilterName.ToUpper()">
+                                <MudButtonGroup Color="Color.Primary" Variant="Variant.Filled" VerticalAlign="true">
+                                    @foreach (var filter in traitFilter.TraitFilters)
+                                    {
+                                        <MudButton @onclick="@(async () => await FilterRankings(@filter))" Variant="Variant.Filled" Disabled="@filterDisabled" Color="Color.Primary">@filter.value (@filter.total)</MudButton>
+                                    }
+                                </MudButtonGroup>
+                            </MudExpansionPanel>
+                        }
+                    </MudExpansionPanels>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+            @if (!String.IsNullOrEmpty(filterString!.Trim()))
+            {
+                <MudButton @onclick="@(async () => await ClearFilters())" Variant="Variant.Filled" Color="Color.Primary" Disabled="@filterDisabled">Clear Filters</MudButton>
+            }
+        </MudItem>
+        <MudItem xs="12" md="9">
+            <Virtualize Items="rankings.rankings"Context="ranking" ItemSize="400" OverscanCount="10">
+                <ItemContent>
+                    @if (MarketplaceEnum == MarketplaceEnum.Gamestop)
+                    {
+                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamestop" ContractAddress="@rankings.contractAddress"></RankingSingleDetails>
+                    }
+                    else
+                    {
+                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Loopexchange"></RankingSingleDetails>
+                    }
+                </ItemContent>
+                <Placeholder>
+                        <MudText Typo="Typo.caption">Loading...</MudText>
+                </Placeholder>
+            </Virtualize>
+        </MudItem>
+    </MudGrid>
+
+}
+
+@code {
+    [Parameter]
+    public string collectionId { get; set; } = "";
+    private Rankings? rankings;
+    private Rankings? originalRankings;
+
+    private List<Filter>? traitFilters {get;set;}
+    private List<TraitFilter> currentFilters { get; set; } = new List<TraitFilter>();
+    private string rankType { get; set; } = "rankingAsc";
+    private MarketplaceEnum MarketplaceEnum { get; set; }
+
+
+    public string RankType
+    {
+        get { return rankType; }
+        set
+        {
+            rankType = value;
+            SortRanks();
+        }
+    }
+    private string? filterString { get; set; } = "";
+    private string? _searchTerm;
+    private string? searchTerm
+    {
+        get { return _searchTerm; }
+        set
+        {
+            _searchTerm = value;
+            DoSearch();
+        }
+    }
+
+    private bool filterDisabled = false;
+
+    private async void DoSearch()
+    {
+        if(string.IsNullOrEmpty(searchTerm!.Trim()))
+        {
+            if (rankings!.rankings.Any(x => x.i == searchTerm.Trim()))
+            {
+                await ShowRarity(collectionId, searchTerm);
+            }
+        }
+    }
+
+    public async Task ShowRarity(string collectionId, string id)
+    {
+        string idParam = $"{collectionId},{id}";
+        var parameters = new DialogParameters();
+        parameters.Add("CollectionId", collectionId);
+        parameters.Add("Id", id);
+        parameters.Add("CollectionTotal", rankings!.total);
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraExtraLarge, DisableBackdropClick = false, NoHeader = true };
+        var dialog = DialogService.Show<RankingSingleDialog>(idParam, parameters, options);
+        var result = await dialog.Result;
+    }
+
+    private async Task FilterRankings(TraitFilter filter)
+    {
+        filterDisabled = true;
+        string filterCleaned = filter.value!.ToString().Replace("\"", "\\\"");
+        TraitFilter traitFilter = new TraitFilter()
+            {
+                trait_type = filter.trait_type,
+                value = filterCleaned,
+                total = 0
+            };
+
+        if (!filterString!.Contains($"AND ARRAY_CONTAINS(c.attributes, {{\"trait_type\" : \"{filter.trait_type}\",\"value\":\"{filterCleaned}\"}}, true)"))
+        {
+            var itemToAdd = currentFilters.FirstOrDefault(x=> x.trait_type == traitFilter.trait_type && (string) x.value! == (string) traitFilter.value);
+            if(itemToAdd == null)
+            {
+                currentFilters.Add(traitFilter);
+            }
+            filterString += $" AND ARRAY_CONTAINS(c.attributes, {{\"trait_type\" : \"{filter.trait_type}\",\"value\":\"{filterCleaned}\"}}, true)";
+        }
+        else if (filterString.Contains($"AND ARRAY_CONTAINS(c.attributes, {{\"trait_type\" : \"{filter.trait_type}\",\"value\":\"{filterCleaned}\"}}, true)"))
+        {
+            var itemToRemove = currentFilters.FirstOrDefault(x=> x.trait_type == traitFilter.trait_type && (string) x.value! == (string) traitFilter.value);
+            if(itemToRemove !=null)
+            {
+                currentFilters.Remove(itemToRemove);
+            }
+            filterString = filterString.Replace($"AND ARRAY_CONTAINS(c.attributes, {{\"trait_type\" : \"{filter.trait_type}\",\"value\":\"{filterCleaned}\"}}, true)", "");
+        }
+
+        if (String.IsNullOrEmpty(filterString.Trim()))
+        {
+            CopyOriginalRankings();
+            traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFilters?collectionId={collectionId}");
+        }
+        else
+        {
+            rankings!.rankings = await Http.GetFromJsonAsync<List<Ranking>>($"api/rarity/rankingsFilteredByTraits?collectionId={collectionId}&traitQuery={filterString}");
+            traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFiltersFiltered?collectionId={collectionId}&traitQuery={filterString}");
+        }
+        SortRanks();
+        filterDisabled = false;
+        StateHasChanged();
+    }
+
+    private async Task ClearFilters()
+    {
+        filterDisabled = true;
+        filterString = "";
+        currentFilters.Clear();
+        traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFilters?collectionId={collectionId}");
+        filterDisabled = false;
+        CopyOriginalRankings();
+        SortRanks();
+        StateHasChanged();
+    }
+
+    private void SortRanks()
+    {
+        if(rankType == "rankingAsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderBy(x => x.r).ToList();
+        }
+        else if (rankType == "rankingDsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderByDescending(x => x.r).ToList();
+        }
+        else if (rankType == "idAsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderByDescending(x => x.i).ToList();
+        }
+        else if (rankType == "idDsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderBy(x => x.i).ToList();
+        }
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        originalRankings = await Http.GetFromJsonAsync<Rankings>($"api/rarity/rankings?collectionId={collectionId}");
+        CopyOriginalRankings();
+        traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFilters?collectionId={collectionId}");
+        if(rankings!.marketplaceurl!.Contains("gamestop.com"))
+        {
+            MarketplaceEnum = MarketplaceEnum.Gamestop;
+        }
+        else
+        {
+            MarketplaceEnum = MarketplaceEnum.Loopexchange;
+        }
+        StateHasChanged();
+    }
+
+    private void CopyOriginalRankings()
+    {
+        rankings = new Rankings();
+        rankings.collectionid = originalRankings!.collectionid;
+        rankings.name = originalRankings.name;
+        rankings.contractAddress = originalRankings.contractAddress;
+        rankings.collectionname = originalRankings.collectionname;
+        rankings.marketplaceurl = originalRankings.marketplaceurl;
+        rankings.total = originalRankings.total;
+        rankings.rankings = new List<Ranking>();
+        foreach (Ranking ranking in originalRankings.rankings)
+        {
+            Ranking tempRanking = new Ranking();
+            tempRanking.i = ranking.i;
+            tempRanking.r = ranking.r;
+            tempRanking.s = ranking.s;
+            tempRanking.im = ranking.im;
+            tempRanking.ni = ranking.ni;
+            tempRanking.ti = ranking.ti;
+            rankings.rankings.Add(tempRanking);
+        }
+    }
+}

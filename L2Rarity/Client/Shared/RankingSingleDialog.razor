@@ -1,0 +1,87 @@
+﻿@using L2Rarity.Client.Models;
+@using L2Rarity.Shared;
+@inject HttpClient Http
+@inject ClipboardService ClipboardService
+
+@if(NftMetadata == null)
+{
+    <MudText Typo="Typo.body1">Loading...</MudText>
+}
+else
+{
+    <MudDialog Style="height:512px; overflow-y: auto; border:hidden;">
+        <DialogContent>
+            <MudGrid>
+                <MudItem sm="6">
+                    <MudPaper Class="d-flex" Elevation="0" Outlined="false">
+                        <MudImage Src="@ImageSourceUrl" ObjectFit="ObjectFit.Contain" Fluid="true" Width="500" Height="500" Style="max-height:500px;"  loading="lazy" />
+                    </MudPaper>
+                </MudItem>
+                <MudItem sm="6">
+                    <MudPaper Class="d-flex" Elevation="0" Outlined="false">
+                        <MudStack>
+                            <MudPaper Elevation="0" Outlined="false">
+                                <MudText Typo="Typo.h5" Inline="true" Color="Color.Warning" Align="Align.Start">Rank @NftMetadata.Rank | </MudText>
+                                <MudText Typo="Typo.h6" Inline="true" Color="Color.Success" Align="Align.End">#@NftMetadata.nftNumber | Score @NftMetadata.Score</MudText>
+                                <br/>
+                                @if(!string.IsNullOrEmpty(NftMetadata.marketplaceUrl))
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@NftMetadata.marketplaceUrl" Target="_blank"></MudIconButton>
+                                }
+                                <MudTooltip Text="Copy shareable link"><MudIconButton OnClick="CopyLink" Icon="@Icons.Material.Filled.Share"></MudIconButton></MudTooltip>
+                            </MudPaper>
+                            <MudPaper Elevation="0" Outlined="false">
+                                <MudTable Items="@NftMetadata.attributes" Striped="true" Dense="true" Hover="true" SortLabel="Sort By" Outlined="false" Breakpoint="Breakpoint.Sm" HorizontalScrollbar="true">
+                                    <ToolBarContent>
+                                        <MudText Typo="Typo.h5">Traits(@NftMetadata!.attributes!.Count categories)</MudText>
+                                    </ToolBarContent>
+                                    <HeaderContent>
+                                        <MudTh><MudTableSortLabel SortBy="new Func<Trait, object>(x=>x.trait_type!)">Type</MudTableSortLabel></MudTh>
+                                        <MudTh><MudTableSortLabel SortBy="new Func<Trait, object>(x=>x.value!)">Value</MudTableSortLabel></MudTh>
+                                        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<Trait, object>(x=>x.score)">Score</MudTableSortLabel></MudTh>
+                                        <MudTh><MudTableSortLabel SortBy="new Func<Trait, object>(x=>x.count)">Occurence</MudTableSortLabel></MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd DataLabel="Type">@context.trait_type</MudTd>
+                                        <MudTd DataLabel="Value">@context.value</MudTd>
+                                        <MudTd DataLabel="Score">@Decimal.Round(@context.score,2)</MudTd>
+                                        <MudTd DataLabel="Occurrence">@context.count (@context.ReturnPercentange(@CollectionTotal)%)</MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            </MudPaper>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+    </MudDialog>
+
+}
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter] 
+    public string? CollectionId { get; set; }
+    [Parameter] 
+    public string? Id { get; set; }
+
+    [Parameter]
+    public int CollectionTotal { get; set; }
+
+    public NftMetadata? NftMetadata { get; set; }
+
+    public string? ImageSourceUrl { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        NftMetadata = await Http.GetFromJsonAsync<NftMetadata>($"api/rarity/rankingsSingle?collectionId={CollectionId}&nftNumber={Id}");
+        ImageSourceUrl = $"https://loopring.mypinata.cloud/ipfs/{NftMetadata!.image!.Remove(0, 7)}?img-height=512&img-width=512";
+    }
+
+    private async Task CopyLink()
+    {
+        await ClipboardService.CopyToClipboard($"https://l2rarity.xyz/nft-collections/{CollectionId}/{Id}");
+    }
+}

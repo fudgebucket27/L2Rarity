@@ -1,0 +1,26 @@
+﻿@page "/nft-collections"
+@using L2Rarity.Shared;
+@inject HttpClient Http;
+<MudText Typo="Typo.h6">NFT Collections</MudText>
+
+@if(listings == null)
+{
+    <MudText Typo="Typo.body1">Loading...</MudText>
+}
+else
+{
+    foreach(Listing listing in listings.listings.OrderBy(x=>x.name))
+    {
+        var href = $"/nft-collections/{listing.id}";
+        <MudLink Href="@href">@listing.name</MudLink>
+        <br />
+    }
+}
+
+@code {
+    private Listings? listings;
+    protected override async Task OnInitializedAsync()
+    {
+        listings = await Http.GetFromJsonAsync<Listings>($"api/rarity/listings");
+    }
+}
