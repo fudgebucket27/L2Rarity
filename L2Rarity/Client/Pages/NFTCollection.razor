@@ -231,7 +231,7 @@ else
         }
         else if (rankType == "priceAsc")
         {
-            rankings!.rankings = rankings.rankings.OrderBy(x => x.p1Decimal).ToList();
+            rankings!.rankings = rankings.rankings.OrderBy(x => x.p1Decimal == 0).ThenBy(x=> x.p1Decimal).ToList();
         }
         else if (rankType == "priceDsc")
         {
