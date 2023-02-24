@@ -218,13 +218,10 @@ else
         if(originalRankings?.pe == true)
         {
             listings1HourAgo = await Http.GetFromJsonAsync<List<Listing1Hour>>($"api/listings/listing?collectionId={collectionId}");
-            foreach(var listing1HourAgo in listings1HourAgo!)
+            var listings1HourAgoDictionary = listings1HourAgo.ToDictionary(x => x.NftId, x => x.Price);
+            foreach(var originalRanking in originalRankings.rankings)
             {
-                var itemToChange = originalRankings.rankings.FirstOrDefault(x => x.ni == listing1HourAgo.NftId);
-                if (itemToChange != null)
-                {
-                    itemToChange.p1 = listing1HourAgo.Price;
-                }
+                originalRanking.p1 = listings1HourAgoDictionary[originalRanking.ni];
             }
         }
         CopyOriginalRankings();

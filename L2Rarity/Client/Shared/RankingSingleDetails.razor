@@ -13,7 +13,7 @@
         <MudText Typo="Typo.subtitle2" Inline="true" Align="Align.End">#@Ranking!.i</MudText>
         <br/>
         <MudText Typo="Typo.caption" Inline="true">Score @Ranking!.s</MudText>
-        @if (GameStopNftListing != null)
+        @if (GameStopNftListing != null || PricingEnabled == true)
         {
             if(PricingEnabled == true && Ranking?.p1 != "0")
             {
@@ -124,7 +124,7 @@
         }
         if(PricingEnabled == true)
         {
-            //Do Nothing No need to get live prices
+            gamestopMarketplaceUrl = $"https://nft.gamestop.com/token/{ContractAddress}/{Ranking.ti}";
         }
         else if(MarketplaceEnum == MarketplaceEnum.Gamestop)
         {
