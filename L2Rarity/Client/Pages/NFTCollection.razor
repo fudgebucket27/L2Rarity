@@ -27,10 +27,22 @@ else
         <MudItem xs="12" md="3">
             <MudTextField Style="background-color:white;" @bind-Value="searchTerm" Label="Enter your NFT ID" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Info" OnAdornmentClick="DoSearch" Margin="Margin.Dense" />
             <MudSelect Style="background-color:white;" @bind-Value="RankType" Label="Order by" Placeholder="Please Select" AdornmentIcon="@Icons.Material.Filled._123" AdornmentColor="Color.Primary">
-                <MudSelectItem Value="@("rankingAsc")">Rank: High to Low</MudSelectItem>
-                <MudSelectItem Value="@("rankingDsc")">Rank: Low to High</MudSelectItem>
-                <MudSelectItem Value="@("idAsc")">ID: High to Low</MudSelectItem>
-                <MudSelectItem Value="@("idDsc")">ID: Low to High</MudSelectItem>
+                @if(originalRankings?.pe == true)
+                {
+                    <MudSelectItem Value="@("rankingAsc")">Rank: High to Low</MudSelectItem>
+                    <MudSelectItem Value="@("rankingDsc")">Rank: Low to High</MudSelectItem>
+                    <MudSelectItem Value="@("idAsc")">ID: Low to High</MudSelectItem>
+                    <MudSelectItem Value="@("idDsc")">ID: High to Low</MudSelectItem>
+                    <MudSelectItem Value="@("priceAsc")">Price: Low to High</MudSelectItem>
+                    <MudSelectItem Value="@("priceDsc")">Price: High to Low</MudSelectItem>
+                }
+                else
+                {
+                    <MudSelectItem Value="@("rankingAsc")">Rank: High to Low</MudSelectItem>
+                    <MudSelectItem Value="@("rankingDsc")">Rank: Low to High</MudSelectItem>
+                    <MudSelectItem Value="@("idAsc")">ID: Low to High</MudSelectItem>
+                    <MudSelectItem Value="@("idDsc")">ID: High to Low</MudSelectItem>
+                }
             </MudSelect>
             <MudExpansionPanels MultiExpansion="true">
                 <MudExpansionPanel Text="Trait Filters">
@@ -86,6 +98,7 @@ else
     private string rankType { get; set; } = "rankingAsc";
     private MarketplaceEnum MarketplaceEnum { get; set; }
     private List<Listing1Hour>? listings1HourAgo { get; set; }
+    private Dictionary<string, string>? listings1HourAgoDictionary { get; set; }
 
 
     public string RankType
@@ -172,6 +185,10 @@ else
         else
         {
             rankings!.rankings = await Http.GetFromJsonAsync<List<Ranking>>($"api/rarity/rankingsFilteredByTraits?collectionId={collectionId}&traitQuery={filterString}");
+            foreach (var traitedRanking in rankings.rankings)
+            {
+                traitedRanking.p1 = listings1HourAgoDictionary[traitedRanking.ni];
+            }
             traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFiltersFiltered?collectionId={collectionId}&traitQuery={filterString}");
         }
         SortRanks();
@@ -203,11 +220,19 @@ else
         }
         else if (rankType == "idAsc")
         {
-            rankings!.rankings = rankings.rankings.OrderByDescending(x => x.i).ToList();
+            rankings!.rankings = rankings.rankings.OrderBy(x => x.i).ToList();
         }
         else if (rankType == "idDsc")
         {
-            rankings!.rankings = rankings.rankings.OrderBy(x => x.i).ToList();
+            rankings!.rankings = rankings.rankings.OrderByDescending(x => x.i).ToList();
+        }
+        else if (rankType == "priceAsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderBy(x => x.p1Decimal).ToList();
+        }
+        else if (rankType == "priceDsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderByDescending(x => x.p1Decimal).ToList();
         }
         StateHasChanged();
     }
@@ -218,7 +243,7 @@ else
         if(originalRankings?.pe == true)
         {
             listings1HourAgo = await Http.GetFromJsonAsync<List<Listing1Hour>>($"api/listings/listing?collectionId={collectionId}");
-            var listings1HourAgoDictionary = listings1HourAgo.ToDictionary(x => x.NftId, x => x.Price);
+            listings1HourAgoDictionary = listings1HourAgo.ToDictionary(x => x.NftId, x => x.Price);
             foreach(var originalRanking in originalRankings.rankings)
             {
                 originalRanking.p1 = listings1HourAgoDictionary[originalRanking.ni];
