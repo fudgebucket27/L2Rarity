@@ -83,6 +83,7 @@ namespace L2Rarity.Server.Controllers
 
         [HttpGet]
         [Route("traitFilters")]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<IActionResult> GetTraitFiltersAsync(string collectionId)
         {
             var result = await _cosmosDbService.GetTraitFiltersAsync(collectionId);

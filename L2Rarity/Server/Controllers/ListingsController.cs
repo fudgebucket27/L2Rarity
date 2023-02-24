@@ -17,6 +17,7 @@ namespace L2Rarity.Server.Controllers
 
         [HttpGet]
         [Route("listing")]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<IActionResult> GetListingsOverallAsync(string collectionId)
         {
             var result = await _sqlClient.GetListings(collectionId);
