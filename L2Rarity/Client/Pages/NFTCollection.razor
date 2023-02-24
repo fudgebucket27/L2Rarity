@@ -185,11 +185,14 @@ else
         else
         {
             rankings!.rankings = await Http.GetFromJsonAsync<List<Ranking>>($"api/rarity/rankingsFilteredByTraits?collectionId={collectionId}&traitQuery={filterString}");
-            foreach (var traitedRanking in rankings.rankings)
-            {
-                traitedRanking.p1 = listings1HourAgoDictionary[traitedRanking.ni];
-            }
             traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFiltersFiltered?collectionId={collectionId}&traitQuery={filterString}");
+            if (originalRankings?.pe == true)
+            {
+                foreach (var traitedRanking in rankings.rankings)
+                {
+                    traitedRanking.p1 = listings1HourAgoDictionary[traitedRanking.ni];
+                }
+            }
         }
         SortRanks();
         filterDisabled = false;
