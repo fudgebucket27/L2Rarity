@@ -59,7 +59,7 @@ else
                 <ItemContent>
                     @if (MarketplaceEnum == MarketplaceEnum.Gamestop)
                     {
-                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamestop" ContractAddress="@rankings.contractAddress"></RankingSingleDetails>
+                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamestop" ContractAddress="@rankings.contractAddress" PricingEnabled="@originalRankings?.pe"></RankingSingleDetails>
                     }
                     else
                     {
@@ -85,6 +85,7 @@ else
     private List<TraitFilter> currentFilters { get; set; } = new List<TraitFilter>();
     private string rankType { get; set; } = "rankingAsc";
     private MarketplaceEnum MarketplaceEnum { get; set; }
+    private List<Listing1Hour>? listings1HourAgo { get; set; }
 
 
     public string RankType
@@ -214,6 +215,18 @@ else
     protected override async Task OnInitializedAsync()
     {
         originalRankings = await Http.GetFromJsonAsync<Rankings>($"api/rarity/rankings?collectionId={collectionId}");
+        if(originalRankings?.pe == true)
+        {
+            listings1HourAgo = await Http.GetFromJsonAsync<List<Listing1Hour>>($"api/listings/listing?collectionId={collectionId}");
+            foreach(var listing1HourAgo in listings1HourAgo!)
+            {
+                var itemToChange = originalRankings.rankings.FirstOrDefault(x => x.ni == listing1HourAgo.NftId);
+                if (itemToChange != null)
+                {
+                    itemToChange.p1 = listing1HourAgo.Price;
+                }
+            }
+        }
         CopyOriginalRankings();
         traitFilters = await Http.GetFromJsonAsync<List<Filter>>($"api/rarity/traitFilters?collectionId={collectionId}");
         if(rankings!.marketplaceurl!.Contains("gamestop.com"))
@@ -236,6 +249,7 @@ else
         rankings.collectionname = originalRankings.collectionname;
         rankings.marketplaceurl = originalRankings.marketplaceurl;
         rankings.total = originalRankings.total;
+        rankings.pe = originalRankings.pe;
         rankings.rankings = new List<Ranking>();
         foreach (Ranking ranking in originalRankings.rankings)
         {
@@ -246,6 +260,7 @@ else
             tempRanking.im = ranking.im;
             tempRanking.ni = ranking.ni;
             tempRanking.ti = ranking.ti;
+            tempRanking.p1 = ranking.p1;
             rankings.rankings.Add(tempRanking);
         }
     }

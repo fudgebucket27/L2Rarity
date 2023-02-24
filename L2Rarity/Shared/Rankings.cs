@@ -31,6 +31,7 @@ namespace L2Rarity.Shared
 
         public string? ni { get; set; } //nft id
         public string? ti { get; set; } //token id
+        public string? p1 { get; set; } //price 1 hour ago
 
     }
 }
