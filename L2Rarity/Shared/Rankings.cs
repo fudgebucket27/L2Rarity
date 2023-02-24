@@ -17,6 +17,7 @@ namespace L2Rarity.Shared
 
         public string? contractAddress { get; set; }
         public int total { get; set; }
+        public bool? pe { get; set; }
         public List<Ranking> rankings { get; set; } = new List<Ranking>();
 
     }

@@ -12,6 +12,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddResponseCaching();
 builder.Services.AddSingleton<ICosmosDbService>(InitializeCosmosClient(configuration));
 builder.Services.AddSingleton<IGamestopClient, GamestopService>();
+builder.Services.AddScoped<ISqlService, SqlService>();
 
 
 var app = builder.Build();
