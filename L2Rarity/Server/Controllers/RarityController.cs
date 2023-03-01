@@ -1,4 +1,5 @@
 ﻿using L2Rarity.Server.Models;
+using LazyCache;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
@@ -11,6 +12,7 @@ namespace L2Rarity.Server.Controllers
     public class RarityController : ControllerBase
     {
         private readonly ICosmosDbService _cosmosDbService;
+        private IAppCache cache = new CachingService();
 
         public RarityController(ICosmosDbService cosmosDbService)
         {
@@ -22,7 +24,7 @@ namespace L2Rarity.Server.Controllers
         [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any, NoStore = false)]
         public async Task<IActionResult> GetRankingsOverallAsync(string collectionId)
         {
-            var result = await _cosmosDbService.GetCollectionOverallRankingsAsync(collectionId);
+            var result = await cache.GetOrAddAsync($"{collectionId}-listings", async () => await _cosmosDbService.GetCollectionOverallRankingsAsync(collectionId), DateTimeOffset.UtcNow.AddHours(1));
             if (result != null)
             {
                 return Ok(result);
