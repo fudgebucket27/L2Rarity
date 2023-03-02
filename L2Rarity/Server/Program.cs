@@ -30,7 +30,7 @@ else
 }
 
 app.UseHttpsRedirection();
-
+app.UseResponseCaching();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
