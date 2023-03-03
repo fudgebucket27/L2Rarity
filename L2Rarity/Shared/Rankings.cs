@@ -35,6 +35,22 @@ namespace L2Rarity.Shared
         public string? ti { get; set; } //token id
         public string? p1 { get; set; } //price 1 hour ago
 
+        public decimal spr
+        {
+            get
+            {
+                if(p1Decimal != 0)
+                {
+                    return s / p1Decimal;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set { }
+        }
+
         private CultureInfo Culture = CultureInfo.CurrentCulture;
 
         public decimal p1Decimal

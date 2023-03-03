@@ -35,6 +35,8 @@ else
                     <MudSelectItem Value="@("idDsc")">ID: High to Low</MudSelectItem>
                     <MudSelectItem Value="@("priceAsc")">Price: Low to High</MudSelectItem>
                     <MudSelectItem Value="@("priceDsc")">Price: High to Low</MudSelectItem>
+                    <MudSelectItem Value="@("sprAsc")">Score/Price Ratio: Low to High</MudSelectItem>
+                    <MudSelectItem Value="@("sprDsc")">Score/Price Ratio: High to Low</MudSelectItem>
                 }
                 else
                 {
@@ -237,6 +239,14 @@ else
         {
             rankings!.rankings = rankings.rankings.OrderByDescending(x => x.p1Decimal).ToList();
         }
+        else if (rankType == "sprAsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderBy(x => x.spr == 0).ThenBy(x => x.spr).ToList();
+        }
+        else if (rankType == "sprDsc")
+        {
+            rankings!.rankings = rankings.rankings.OrderByDescending(x => x.spr).ToList();
+        }
         StateHasChanged();
     }
 
@@ -286,6 +296,7 @@ else
             tempRanking.ni = ranking.ni;
             tempRanking.ti = ranking.ti;
             tempRanking.p1 = ranking.p1;
+            tempRanking.spr = ranking.spr;
             rankings.rankings.Add(tempRanking);
         }
     }
