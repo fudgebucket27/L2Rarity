@@ -40,6 +40,10 @@
                 <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@gamestopMarketplaceUrl" Target="_blank"></MudIconButton></MudText>
             }
         }
+        else if (MarketplaceEnum == MarketplaceEnum.Loopexchange && !string.IsNullOrEmpty(Ranking!.ni))
+        {
+            <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@loopexchangeUrl" Target="_blank"></MudIconButton></MudText>
+        }
         else if(isLoading == true)
         {
             <MudText Typo="Typo.caption" Inline="true"> | Fetching price...</MudText>
@@ -68,9 +72,14 @@
     [Parameter]
     public bool? PricingEnabled { get; set; }
 
+    [Parameter]
+    public string? MarketplacetUrl { get; set; }
+
     public Dictionary<string, Value>? GameStopNftListing { get; set; }
 
     public string? gamestopMarketplaceUrl { get; set; }
+
+    public string? loopexchangeUrl { get; set; }
 
     public void Dispose()
     {
@@ -132,6 +141,10 @@
             GameStopNftListing = await Http.GetFromJsonAsync<Dictionary<string, Value>>($"api/gamestop/listing?nftId={Ranking!.ni}", cts.Token);
             gamestopMarketplaceUrl = $"https://nft.gamestop.com/token/{ContractAddress}/{Ranking.ti}";
             isLoading = false;
+        }
+        else if (MarketplaceEnum == MarketplaceEnum.Loopexchange && !string.IsNullOrEmpty(Ranking!.ni))
+        {
+            loopexchangeUrl = $"{MarketplacetUrl}/item/{Ranking.ni}";
         }
         StateHasChanged();
     }
