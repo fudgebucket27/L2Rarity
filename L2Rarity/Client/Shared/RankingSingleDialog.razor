@@ -21,14 +21,15 @@ else
                     <MudPaper Class="d-flex" Elevation="0" Outlined="false">
                         <MudStack>
                             <MudPaper Elevation="0" Outlined="false">
-                                <MudText Typo="Typo.h5" Inline="true" Color="Color.Warning" Align="Align.Start">Rank @NftMetadata.Rank | </MudText>
-                                <MudText Typo="Typo.h6" Inline="true" Color="Color.Success" Align="Align.End">#@NftMetadata.nftNumber | Score @NftMetadata.Score</MudText>
-                                <br/>
+                                <MudTooltip Text="Rank"><MudChip Icon="@Icons.Material.Filled.Leaderboard" Variant="Variant.Text">@NftMetadata.Rank</MudChip></MudTooltip>
+                                <MudTooltip Text="ID"><MudChip Icon="@Icons.Material.Filled.Numbers" Variant="Variant.Text">@NftMetadata.nftNumber</MudChip></MudTooltip>
+                                <MudTooltip Text="Score"><MudChip Icon="@Icons.Material.Filled.SportsScore" Variant="Variant.Text">@NftMetadata.Score</MudChip></MudTooltip>
                                 @if(!string.IsNullOrEmpty(NftMetadata.marketplaceUrl))
                                 {
-                                    <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@NftMetadata.marketplaceUrl" Target="_blank"></MudIconButton>
+                                    <MudTooltip Text="Marketplace"><MudChip Icon="@Icons.Material.Filled.ShoppingCart" Variant="Variant.Text" Color="Color.Primary" Href="@NftMetadata.marketplaceUrl" Target="_blank"></MudChip></MudTooltip>
                                 }
-                                <MudTooltip Text="Copy shareable link"><MudIconButton OnClick="CopyLink" Icon="@Icons.Material.Filled.Share"></MudIconButton></MudTooltip>
+                                <MudTooltip Text="Copy shareable link"><MudChip Icon="@Icons.Material.Filled.Share" Variant="Variant.Text" Color="Color.Primary" OnClick="CopyLink"></MudChip>
+                                </MudTooltip>
                             </MudPaper>
                             <MudPaper Elevation="0" Outlined="false">
                                 <MudTable Items="@NftMetadata.attributes" Striped="true" Dense="true" Hover="true" SortLabel="Sort By" Outlined="false" Breakpoint="Breakpoint.Sm" HorizontalScrollbar="true">
