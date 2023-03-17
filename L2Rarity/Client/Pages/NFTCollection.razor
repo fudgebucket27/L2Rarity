@@ -13,18 +13,6 @@ else
     <MudText Typo="Typo.caption">@rankings.total.ToString("N0") items</MudText>
     <MudGrid>
         <MudItem xs="12" md="3" Class="traitFilterBox">
-            @if (currentFilters.Count > 0)
-            {
-                <br />
-            }
-            @foreach (var currentFilter in currentFilters)
-            {
-                <MudButton @onclick="@(async () => await FilterRankings(currentFilter))" Variant="Variant.Filled" Size="Size.Small" Disabled="@filterDisabled">@currentFilter.trait_type:@currentFilter.value</MudButton>
-            }
-            @if (currentFilters.Count > 0)
-            {
-                <br />
-            }
             <MudTextField Style="background-color:white;" @bind-Value="searchTerm" Label="Enter your NFT ID" Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Info" OnAdornmentClick="DoSearch" Margin="Margin.Dense" />
             <MudSelect Style="background-color:white;" @bind-Value="RankType" Label="Order by" Placeholder="Please Select" AdornmentIcon="@Icons.Material.Filled._123" AdornmentColor="Color.Primary">
                 @if(originalRankings?.pe == true)
@@ -63,6 +51,18 @@ else
                     </MudExpansionPanels>
                 </MudExpansionPanel>
             </MudExpansionPanels>
+            @if (currentFilters.Count > 0)
+            {
+                <br />
+            }
+            @foreach (var currentFilter in currentFilters)
+            {
+                <MudButton @onclick="@(async () => await FilterRankings(currentFilter))" Variant="Variant.Filled" Size="Size.Small" Disabled="@filterDisabled">@currentFilter.trait_type:@currentFilter.value</MudButton>
+            }
+            @if (currentFilters.Count > 0)
+            {
+                <br />
+            }
             @if (!String.IsNullOrEmpty(filterString!.Trim()))
             {
                 <MudButton @onclick="@(async () => await ClearFilters())" Variant="Variant.Filled" Color="Color.Primary" Disabled="@filterDisabled">Clear Filters</MudButton>
