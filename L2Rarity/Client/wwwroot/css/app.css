@@ -109,3 +109,18 @@ a, .btn-link {
     white-space: nowrap;
     overflow: hidden;
 }
+
+.traitFilterBox {
+    position: sticky !important;
+    top: 50px !important;
+    height: 100vh !important;
+    overflow-y: scroll !important;
+    padding-bottom: 70px !important;
+}
+
+@media (max-width: 1000px) {
+    .traitFilterBox {
+        all: unset !important;
+        padding-top: 10px !important;
+    }
+}
