@@ -81,7 +81,7 @@ else
                     }
                     else
                     {
-                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamma" MarketplacetUrl="@rankings.marketplaceurl"></RankingSingleDetails>
+                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamma" MarketplacetUrl="@rankings.marketplaceurl" PricingEnabled="@originalRankings?.pe"></RankingSingleDetails>
                     }
                 </ItemContent>
                 <Placeholder>
@@ -262,7 +262,14 @@ else
             listings1HourAgoDictionary = listings1HourAgo.ToDictionary(x => x.NftId, x => x.Price);
             foreach(var originalRanking in originalRankings.rankings)
             {
-                originalRanking.p1 = listings1HourAgoDictionary[originalRanking.ni];
+                if (originalRankings!.marketplaceurl!.Contains("gamestop.com"))
+                {
+                    originalRanking.p1 = listings1HourAgoDictionary[originalRanking.ni];
+                }
+                else if (originalRankings!.marketplaceurl!.Contains("gamma.io"))
+                {
+                    originalRanking.p1 = listings1HourAgoDictionary[originalRanking.i];
+                }
             }
         }
         CopyOriginalRankings();
