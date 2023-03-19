@@ -44,6 +44,10 @@
         {
             <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@loopexchangeUrl" Target="_blank"></MudIconButton></MudText>
         }
+        else if (MarketplaceEnum == MarketplaceEnum.Gamma && !string.IsNullOrEmpty(Ranking!.i))
+        {
+            <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@gammaUrl" Target="_blank"></MudIconButton></MudText>
+        }
         else if(isLoading == true)
         {
             <MudText Typo="Typo.caption" Inline="true"> | Fetching price...</MudText>
@@ -80,6 +84,8 @@
     public string? gamestopMarketplaceUrl { get; set; }
 
     public string? loopexchangeUrl { get; set; }
+
+    public string? gammaUrl { get; set; }
 
     public void Dispose()
     {
@@ -145,6 +151,10 @@
         else if (MarketplaceEnum == MarketplaceEnum.Loopexchange && !string.IsNullOrEmpty(Ranking!.ni))
         {
             loopexchangeUrl = $"{MarketplacetUrl}/item/{Ranking.ni}";
+        }
+        else if (MarketplaceEnum == MarketplaceEnum.Gamma && !string.IsNullOrEmpty(Ranking!.i))
+        {
+            gammaUrl = $"{MarketplacetUrl}/{Ranking.i}";
         }
         StateHasChanged();
     }

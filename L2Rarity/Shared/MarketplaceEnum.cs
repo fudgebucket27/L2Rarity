@@ -10,6 +10,7 @@ namespace L2Rarity.Shared
     {
 
         Gamestop,
-        Loopexchange
+        Loopexchange,
+        Gamma
     }
 }

@@ -75,9 +75,13 @@ else
                     {
                         <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamestop" ContractAddress="@rankings.contractAddress" PricingEnabled="@originalRankings?.pe"></RankingSingleDetails>
                     }
-                    else
+                    else if (MarketplaceEnum == MarketplaceEnum.Loopexchange)
                     {
                         <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Loopexchange" MarketplacetUrl="@rankings.marketplaceurl"></RankingSingleDetails>
+                    }
+                    else
+                    {
+                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Gamma" MarketplacetUrl="@rankings.marketplaceurl"></RankingSingleDetails>
                     }
                 </ItemContent>
                 <Placeholder>
@@ -267,9 +271,13 @@ else
         {
             MarketplaceEnum = MarketplaceEnum.Gamestop;
         }
-        else
+        else if (rankings!.marketplaceurl!.Contains("loopexchange.art"))
         {
             MarketplaceEnum = MarketplaceEnum.Loopexchange;
+        }
+        else
+        {
+            MarketplaceEnum = MarketplaceEnum.Gamma;
         }
         StateHasChanged();
     }
