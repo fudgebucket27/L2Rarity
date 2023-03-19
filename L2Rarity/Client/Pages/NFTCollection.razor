@@ -195,7 +195,15 @@ else
             {
                 foreach (var traitedRanking in rankings.rankings)
                 {
-                    traitedRanking.p1 = listings1HourAgoDictionary[traitedRanking.ni];
+                    if(MarketplaceEnum == MarketplaceEnum.Gamma)
+                    {
+                        traitedRanking.p1 = listings1HourAgoDictionary[traitedRanking.i];
+                    }
+                    else
+                    {
+                        traitedRanking.p1 = listings1HourAgoDictionary[traitedRanking.ni];
+                    }
+
                 }
             }
         }
