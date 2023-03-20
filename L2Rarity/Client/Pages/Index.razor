@@ -1,8 +1,44 @@
 ﻿@page "/"
+@using L2Rarity.Shared
+@inject HttpClient Http
 
 <PageTitle>Home</PageTitle>
 
 <MudText Typo="Typo.h6">The #1 source for NFT rarity on Layer 2</MudText>
 <MudText Typo="Typo.body1">L2 Rarity is the best way to check the rarity of NFT Collections on Gamestop and Loopring.</MudText>
-<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/nft-collections">View NFT Collections</MudButton>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/nft-collections">View All NFT Collections</MudButton>
 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/get-listed">Get Listed</MudButton>
+
+@if (collection == null)
+{
+    <MudText Typo="Typo.body1">Loading...</MudText>
+}
+else
+{
+    <p></p>
+    <p></p>
+    <MudText Typo="Typo.h6">Featured Collection</MudText>
+    <MudGrid>
+        <MudItem xs="3">
+            <MudCard class="d-inline-flex ma-2">
+                <MudCardContent>
+                    <img src="@collection.ImageUrl" height="256" width="auto" loading="lazy" />
+                    <MudText Typo="Typo.h5">@collection.CollectionDisplayName</MudText>
+                    <MudText Typo="Typo.body2">@collection.Description</MudText>
+                    <br />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@collectionUrl">View Collection</MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private Collection? collection;
+    private string? collectionUrl;
+    protected override async Task OnInitializedAsync()
+    {
+        collection = await Http.GetFromJsonAsync<Collection>("api/listings/randomCollection");
+        collectionUrl = $"/nft-collections/{collection.CollectionId}";
+    }
+}

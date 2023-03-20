@@ -30,5 +30,35 @@ namespace L2Rarity.Server.Controllers
                 return BadRequest("Something went wrong!");
             }
         }
+
+        [HttpGet]
+        [Route("collections")]
+        public async Task<IActionResult> GetCollectionsAsync()
+        {
+            var result = await _sqlClient.GetCollections();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Something went wrong!");
+            }
+        }
+
+        [HttpGet]
+        [Route("randomCollection")]
+        public async Task<IActionResult> GetRandomCollectionAsync()
+        {
+            var result = await _sqlClient.GetRandomCollection();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Something went wrong!");
+            }
+        }
     }
 }

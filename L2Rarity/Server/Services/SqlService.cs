@@ -14,6 +14,18 @@ namespace L2Rarity.Server.Services
             Configuration = _configuration;
         }
 
+        public async Task<List<Collection>> GetCollections()
+        {
+            using (var db = new SqlConnection(Configuration.GetValue<string>("DbConnectionString")))
+            {
+                await db.OpenAsync();
+                var result = await db
+                    .QueryAsync<Collection>
+                    ("SELECT * from collections;");
+                return result.ToList();
+            }
+        }
+
         public async Task<List<Listing1Hour>> GetListings(string _collectionId)
         {
             using (var db = new SqlConnection(Configuration.GetValue<string>("DbConnectionString")))
@@ -24,6 +36,18 @@ namespace L2Rarity.Server.Services
                     .QueryAsync<Listing1Hour>
                     ("select * from listings where collectionId = @collectionId", parameters);
                 return result.ToList();
+            }
+        }
+
+        public async Task<Collection> GetRandomCollection()
+        {
+            using (var db = new SqlConnection(Configuration.GetValue<string>("DbConnectionString")))
+            {
+                await db.OpenAsync();
+                var result = await db
+                    .QueryAsync<Collection>
+                    ("SELECT TOP 1 * from collections\r\nORDER BY NEWID()");
+                return result.First();
             }
         }
     }
