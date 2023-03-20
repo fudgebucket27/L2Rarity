@@ -1,26 +1,56 @@
 ﻿@page "/nft-collections"
 @using L2Rarity.Shared;
 @inject HttpClient Http;
-<MudText Typo="Typo.h6">NFT Collections</MudText>
-
-@if(listings == null)
+@if(collections == null)
 {
     <MudText Typo="Typo.body1">Loading...</MudText>
 }
 else
 {
-    foreach(Listing listing in listings.listings.OrderBy(x=>x.name))
-    {
-        var href = $"/nft-collections/{listing.id}";
-        <MudLink Href="@href">@listing.name</MudLink>
-        <br />
-    }
+    <MudTable Items="@collections" Dense="true" Hover="true" Bordered="true" Striped="true" Filter="new Func<Collection,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">NFT Collections</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh></MudTh>
+            <MudTh>Collection Name</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Icon"><MudImage Src="@context.ImageUrl" Width="96" Height="96" Alt="Icon" Elevation="25" Class="rounded-lg ma-4" /></MudTd>
+            <MudTd DataLabel="Name">@context.CollectionDisplayName</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+            <MudTd><MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@context.CollectionLink">View</MudButton></MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
 }
 
 @code {
-    private Listings? listings;
+    private IEnumerable<Collection>? collections = new List<Collection>();
+    private bool loaded = false;
+
+    private string searchString1 = "";
+    private Collection selectedItem1 = null;
+    private HashSet<Collection> selectedItems = new HashSet<Collection>();
     protected override async Task OnInitializedAsync()
     {
-        listings = await Http.GetFromJsonAsync<Listings>($"api/rarity/listings");
+        collections = await Http.GetFromJsonAsync<List<Collection>>($"api/listings/collections");
+    }
+
+    private bool FilterFunc1(Collection element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(Collection element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.CollectionDisplayName.Contains(searchString.Trim(), StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
     }
 }
