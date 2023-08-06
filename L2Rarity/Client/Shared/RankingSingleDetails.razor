@@ -130,11 +130,11 @@
         {
             if(Ranking.im!.Contains("ipfs://"))
             {
-                imageUrl = $"https://loopring.mypinata.cloud/ipfs/{Ranking.im.Remove(0, 7)}?img-height=256";
+                imageUrl = $"https://ipfs.loopring.io/ipfs/{Ranking.im.Remove(0, 7)}?img-height=256";
             }
             else
             {
-                imageUrl = $"https://loopring.mypinata.cloud/ipfs/{Ranking.im}?img-height=256";
+                imageUrl = $"https://ipfs.loopring.io/ipfs/{Ranking.im}?img-height=256";
             }
         }
         if(PricingEnabled == true && MarketplaceEnum == MarketplaceEnum.Gamestop)
