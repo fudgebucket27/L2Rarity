@@ -77,7 +77,7 @@ else
                     }
                     else if (MarketplaceEnum == MarketplaceEnum.Loopexchange)
                     {
-                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Loopexchange" MarketplacetUrl="@rankings.marketplaceurl"></RankingSingleDetails>
+                        <RankingSingleDetails @key="ranking.i" Ranking="ranking" CollectionId="@rankings.collectionid" CollectionTotal="@rankings.total" MarketplaceEnum="@MarketplaceEnum.Loopexchange" MarketplacetUrl="@rankings.marketplaceurl" PricingEnabled="@originalRankings?.pe"></RankingSingleDetails>
                     }
                     else
                     {
@@ -277,6 +277,10 @@ else
                 else if (originalRankings!.marketplaceurl!.Contains("gamma.io"))
                 {
                     originalRanking.p1 = listings1HourAgoDictionary[originalRanking.i];
+                }
+                else if (originalRankings!.marketplaceurl!.Contains("loopexchange.art"))
+                {
+                    originalRanking.p1 = listings1HourAgoDictionary[originalRanking.ni];
                 }
             }
         }

@@ -35,6 +35,17 @@
                 <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | N/A </MudText>
                 <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@gammaUrl" Target="_blank"></MudIconButton></MudText>
             }
+            if (PricingEnabled == true && Ranking?.p1 != "0" && MarketplaceEnum == MarketplaceEnum.Loopexchange)
+            {
+                <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | @ToString(Double.Parse(Ranking?.p1!),18) LRC</MudText>
+                <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudTooltip Text="@scorePriceRatio"><MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@loopexchangeUrl" Target="_blank"></MudIconButton></MudTooltip></MudText>
+            }
+            else if (PricingEnabled == true && Ranking?.p1 == "0" && MarketplaceEnum == MarketplaceEnum.Loopexchange)
+            {
+                <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | N/A </MudText>
+                <MudText Typo="Typo.caption" Inline="true" Align="Align.End"> | <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Href="@loopexchangeUrl" Target="_blank"></MudIconButton></MudText>
+            }
+
         }
         else if (MarketplaceEnum == MarketplaceEnum.Loopexchange && !string.IsNullOrEmpty(Ranking!.ni))
         {
@@ -97,9 +108,14 @@
             {
                 return "Score/Price Ratio:" + ScorePriceRatio(Ranking!.s, Decimal.Parse(@ToString(Double.Parse(Ranking?.p1!), 18), NumberStyles.Number)).ToString("0.00");
             }
-            if (PricingEnabled == true && MarketplaceEnum == MarketplaceEnum.Gamma)
+            else if (PricingEnabled == true && MarketplaceEnum == MarketplaceEnum.Gamma)
             {
                 return "Score/Price Ratio:" + ScorePriceRatio(Ranking!.s, Decimal.Parse(@ToString(Double.Parse(Ranking?.p1!), 6), NumberStyles.Number)).ToString("0.00");
+            }
+            else if (PricingEnabled == true && MarketplaceEnum == MarketplaceEnum.Loopexchange
+            )
+            {
+                return "Score/Price Ratio:" + ScorePriceRatio(Ranking!.s, Decimal.Parse(@ToString(Double.Parse(Ranking?.p1!), 18), NumberStyles.Number)).ToString("0.00");
             }
             else
             {
