@@ -100,7 +100,7 @@ else
         CollectionStats? collectionStats = await Http.GetFromJsonAsync<CollectionStats>($"api/rarity/stats?collectionId={CollectionId}");
         CollectionTotal = collectionStats!.total;
         NftMetadata = await Http.GetFromJsonAsync<NftMetadata>($"api/rarity/rankingsSingle?collectionId={CollectionId}&nftNumber={Id}");
-        ImageSourceUrl = $"https://ipfs.loopring.io/ipfs/{NftMetadata!.image!.Remove(0, 7)}";
+        ImageSourceUrl = $"https://www.gstop-content.com/ipfs/{NftMetadata!.image!.Remove(0, 7)}";
         collectionUrl = $"nft-collections/{CollectionId}";
 
         if (NftMetadata != null && !string.IsNullOrEmpty(NftMetadata!.marketplaceUrl!) && NftMetadata!.marketplaceUrl!.Contains("nft.gamestop.com"))

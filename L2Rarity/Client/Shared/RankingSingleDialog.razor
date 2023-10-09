@@ -78,7 +78,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         NftMetadata = await Http.GetFromJsonAsync<NftMetadata>($"api/rarity/rankingsSingle?collectionId={CollectionId}&nftNumber={Id}");
-        ImageSourceUrl = $"https://ipfs.loopring.io/ipfs/{NftMetadata!.image!.Remove(0, 7)}?img-height=512&img-width=512";
+        ImageSourceUrl = $"https://www.gstop-content.com/ipfs/{NftMetadata!.image!.Remove(0, 7)}?img-height=512&img-width=512";
     }
 
     private async Task CopyLink()
