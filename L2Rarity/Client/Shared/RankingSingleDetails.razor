@@ -146,11 +146,11 @@
         {
             if(Ranking.im!.Contains("ipfs://"))
             {
-                imageUrl = $"https://www.gstop-content.com/ipfs/{Ranking.im.Remove(0, 7)}?img-width=256";
+                imageUrl = $"https://ipfs.loopring.io/ipfs/{Ranking.im.Remove(0, 7)}?img-width=256";
             }
             else
             {
-                imageUrl = $"https://www.gstop-content.com/ipfs/{Ranking.im}?img-width=256";
+                imageUrl = $"https://ipfs.loopring.io/ipfs/{Ranking.im}?img-width=256";
             }
         }
         if(PricingEnabled == true && MarketplaceEnum == MarketplaceEnum.Gamestop)
